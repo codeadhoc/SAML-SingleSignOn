@@ -1,0 +1,30 @@
+{
+  "name": "single-signon-app",
+  "version": "1.0.0",
+  "description": "Application for single-sign-on with SAML protocal for authentication",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "NodeJs",
+    "Single-Sign-On",
+    "SSO",
+    "SAML",
+    "IDP",
+    "Docker",
+    "Containers",
+    "Keycloak"
+  ],
+  "author": "Viral Gohil",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "cookie": "^0.4.2",
+    "express": "^4.17.3",
+    "express-session": "^1.17.2",
+    "parser": "^0.1.4",
+    "passport": "^0.5.2",
+    "passport-saml": "^3.2.1"
+  }
+}
