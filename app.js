@@ -9,10 +9,10 @@ var fs = require('fs');
 var PORT = 3000;
 
 //read ceritificate
-var fs_sp_pvt_key = __dirname + '\\sp-pvt-key.pem';
+var fs_sp_pvt_key = 'sp-pvt-key.pem';
 var sp_pvt_key = fs.readFileSync(fs_sp_pvt_key, 'utf8');
 
-var fs_idp_pub_key = __dirname + '\\idp-pub-key.pem';
+var fs_idp_pub_key = 'idp-pub-key.pem';
 var idp_pub_key = fs.readFileSync(fs_idp_pub_key, 'utf8');
 
 
@@ -92,6 +92,6 @@ app.post('/login/callback',
 
 //setup the app
 app.listen(PORT, function () {
-    console.log('Running on http://localhost:${PORT}');
+    console.log(`Running on http://localhost:${PORT}`);
 });
 
