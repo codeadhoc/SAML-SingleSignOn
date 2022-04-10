@@ -1,55 +1,72 @@
+/**
+ * SSO INTERGRATION
+ */
+var https = require('https');
 var express = require('express');
 var session = require('express-session');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var passport = require('passport');
 var saml = require('passport-saml');
 var fs = require('fs');
 
-//constants
-var PORT = 3000;
-
-//read ceritificate
-var fs_sp_pvt_key = 'sp-pvt-key.pem';
-var sp_pvt_key = fs.readFileSync(fs_sp_pvt_key, 'utf8');
-
-var fs_idp_pub_key = 'idp-pub-key.pem';
-var idp_pub_key = fs.readFileSync(fs_idp_pub_key, 'utf8');
+const PORT = 3000;
 
 
-//setup saml
-var samlstrategy = new saml.Strategy({
-    callbackUrl: 'http://3.84.95.177:3000/login/callback',
-    entryPoint: 'https://3.84.95.177/realms/EnterpriseApps/protocol/saml',
-    issuer: 'EnterpriseCustomApp',
-    identifierFormat: 'null',
-    decryptionPvk: sp_pvt_key,
-    privateKey: sp_pvt_key,
-    validateInResponseTo: false,
-    disableRequestedAuthnContext: true,
-    cert: idp_pub_key
-}, function (profile, done) {
-    return done(null, profile);
-});
+// Saml Configurations attributes
+const samlConfig = {
+    issuer: "EnterpriseCustomApp",
+    entityId: "Saml-SSO-App",
+    callbackUrl: "https://3.84.95.177:3000/login/callback",
+    signOut: "https://3.84.95.177:3000/signout/callback",
+    entryPoint: "https://3.84.95.177/realms/EnterpriseApps/protocol/saml",
+};
 
-//setup passport & configure SAML strategy
+// For running apps on https mode
+const sp_pub_cert = fs.readFileSync('sp-pub-key.pem', 'utf8');
+const sp_pvk_key = fs.readFileSync('sp-pvt-key.pem', 'utf8');
+
+//  from idp's metadata
+const idp_cert = fs.readFileSync('idp-pub-key.pem', 'utf8');
+
 passport.serializeUser(function (user, done) {
+    console.log('-----------------------------');
+    console.log('serialize user');
     console.log(user);
+    console.log('-----------------------------');
     done(null, user);
 });
 
 passport.deserializeUser(function (user, done) {
+    console.log('-----------------------------');
+    console.log('deserialize user');
     console.log(user);
+    console.log('-----------------------------');
     done(null, user);
 });
 
-passport.use('samlStrategy', samlstrategy);
+const samlStrategy = new saml.Strategy({
+    callbackUrl: samlConfig.callbackUrl,
+    entryPoint: samlConfig.entryPoint,
+    issuer: samlConfig.issuer,
+    identifierFormat: null,
+    decryptionPvk: sp_pvk_key,
+    cert: [idp_cert, idp_cert],
+    privateCert: fs.readFileSync('sp-pvt-key.pem', 'utf8'),
+    validateInResponseTo: true,
+    disableRequestedAuthnContext: true,
 
-//init app
-var app = express();
+}, (profile, done) => {
+    console.log('passport.use() profile: %s \n', JSON.stringify(profile));
+    return done(null, profile);
+});
 
-//configure app
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+
+const app = express();
+app.use(cookieParser());
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 app.use(session({
     secret: 'secret',
@@ -57,41 +74,43 @@ app.use(session({
     saveUninitialized: true,
 }));
 
+passport.use('samlStrategy', samlStrategy);
 app.use(passport.initialize({}));
 app.use(passport.session({}));
 
-//configure routes
-app.get('/home', function (req, res) {
-    res.send('This is test home page');
-});
 
-//login
-app.get('/login', function (req, res, next) {
-    console.log('inside login handler');
-    next();
-}, passport.authenticate('samlStrategy')
+app.get('/',
+    (req, res) => {
+        res.send('Test Home Page');
+    }
 );
 
-//post login
-app.post('/login/callback',
-    function (req, res, next) {
+app.get('/login',
+    (req, res, next) => {
         console.log('-----------------------------');
+        console.log('/Start login handler');
+        next();
+    },
+    passport.authenticate('samlStrategy'),
+);
+
+app.post('/login/callback',
+    (req, res, next) => {
         console.log('/Start login callback ');
         next();
     },
     passport.authenticate('samlStrategy'),
-    function (req, res) {
-        console.log('-----------------------------');
-        console.log('login call back dumps');
+    (req, res) => {
+        console.log("/SSO payload");
         console.log(req.user);
-        console.log('-----------------------------');
-        res.send('Log in Callback Success');
+        res.send(req.user);
     }
 );
 
-
-//setup the app
-app.listen(PORT, function () {
-    console.log(`Running on http://localhost:${PORT}`);
+// if https server
+const server = https.createServer({
+    'key': sp_pvk_key,
+    'cert': sp_pub_cert
+}, app).listen(PORT, () => {
+    console.log('Listening on https://localhost:%d', server.address().port)
 });
-

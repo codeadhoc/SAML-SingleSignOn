@@ -21,8 +21,10 @@
   "dependencies": {
     "body-parser": "^1.20.0",
     "cookie": "^0.4.2",
+    "cookie-parser": "^1.4.6",
     "express": "^4.17.3",
     "express-session": "^1.17.2",
+    "https": "^1.0.0",
     "parser": "^0.1.4",
     "passport": "^0.5.2",
     "passport-saml": "^3.2.1"
