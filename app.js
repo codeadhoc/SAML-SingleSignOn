@@ -18,8 +18,8 @@ var idp_pub_key = fs.readFileSync(fs_idp_pub_key, 'utf8');
 
 //setup saml
 var samlstrategy = new saml.Strategy({
-    callbackUrl: 'https://ec2-52-90-86-169.compute-1.amazonaws.com:3000/login/callback',
-    entryPoint: 'https://ec2-52-90-86-169.compute-1.amazonaws.com/realms/EnterpriseApps/protocol/saml',
+    callbackUrl: 'http://3.84.95.177:3000/login/callback',
+    entryPoint: 'https://3.84.95.177/realms/EnterpriseApps/protocol/saml',
     issuer: 'EnterpriseCustomApp',
     identifierFormat: 'null',
     decryptionPvk: sp_pvt_key,
