@@ -1,6 +1,3 @@
-/**
- * SSO INTERGRATION
- */
 var https = require('https');
 var express = require('express');
 var session = require('express-session');
@@ -10,10 +7,16 @@ var passport = require('passport');
 var saml = require('passport-saml');
 var fs = require('fs');
 
+//declare constants
 const PORT = 3000;
 
 
-// Saml Configurations attributes
+/** SAML Configurations attributes
+ * callbackurl : apps url for IDP to response post authetication
+ * signout: apps url for IDP to notify app post signout
+ * entrypoint: IDP url to redirect for authentication
+ * entityId : Apps Id
+ */
 const samlConfig = {
     issuer: "EnterpriseCustomApp",
     entityId: "Saml-SSO-App",
@@ -23,28 +26,26 @@ const samlConfig = {
 };
 
 // For running apps on https mode
+// load the public certificate
 const sp_pub_cert = fs.readFileSync('sp-pub-key.pem', 'utf8');
+
+//load the private key
 const sp_pvk_key = fs.readFileSync('sp-pvt-key.pem', 'utf8');
 
-//  from idp's metadata
+//Idp's certificate from metadata
 const idp_cert = fs.readFileSync('idp-pub-key.pem', 'utf8');
 
 passport.serializeUser(function (user, done) {
-    console.log('-----------------------------');
-    console.log('serialize user');
-    console.log(user);
-    console.log('-----------------------------');
+    //Serialize user, console.log if needed
     done(null, user);
 });
 
 passport.deserializeUser(function (user, done) {
-    console.log('-----------------------------');
-    console.log('deserialize user');
-    console.log(user);
-    console.log('-----------------------------');
+    //Deserialize user, console.log if needed
     done(null, user);
 });
 
+// configure SAML strategy for SSO
 const samlStrategy = new saml.Strategy({
     callbackUrl: samlConfig.callbackUrl,
     entryPoint: samlConfig.entryPoint,
@@ -55,19 +56,20 @@ const samlStrategy = new saml.Strategy({
     privateCert: fs.readFileSync('sp-pvt-key.pem', 'utf8'),
     validateInResponseTo: true,
     disableRequestedAuthnContext: true,
-
 }, (profile, done) => {
     console.log('passport.use() profile: %s \n', JSON.stringify(profile));
     return done(null, profile);
 });
 
-
+//initialize the express middleware
 const app = express();
 app.use(cookieParser());
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+//configure session management
+// Note: Always configure session before passport initialization & passport session, else error will be encounter
 app.use(session({
     secret: 'secret',
     resave: false,
@@ -78,36 +80,40 @@ passport.use('samlStrategy', samlStrategy);
 app.use(passport.initialize({}));
 app.use(passport.session({}));
 
-
+/** Configure routes **/
+// default route
 app.get('/',
     (req, res) => {
         res.send('Test Home Page');
     }
 );
 
+//login route
 app.get('/login',
     (req, res, next) => {
-        console.log('-----------------------------');
-        console.log('/Start login handler');
+
+        //login handler starts
         next();
     },
     passport.authenticate('samlStrategy'),
 );
 
+//post login callback route
 app.post('/login/callback',
     (req, res, next) => {
-        console.log('/Start login callback ');
+
+        //login callback starts
         next();
     },
     passport.authenticate('samlStrategy'),
     (req, res) => {
-        console.log("/SSO payload");
-        console.log(req.user);
-        res.send(req.user);
+
+        //SSO response payload
+        res.send(req.user.attributes);
     }
 );
 
-// if https server
+//Run the https server
 const server = https.createServer({
     'key': sp_pvk_key,
     'cert': sp_pub_cert
