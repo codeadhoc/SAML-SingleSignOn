@@ -27,7 +27,7 @@ const samlConfig = {
 
 // For running apps on https mode
 // load the public certificate
-const sp_pub_cert = fs.readFileSync('sp-pub-key.pem', 'utf8');
+const sp_pub_cert = fs.readFileSync('sp-pub-cert.pem', 'utf8');
 
 //load the private key
 const sp_pvk_key = fs.readFileSync('sp-pvt-key.pem', 'utf8');
