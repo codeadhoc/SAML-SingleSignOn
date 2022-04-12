@@ -20,9 +20,9 @@ const PORT = 3000;
 const samlConfig = {
     issuer: "EnterpriseCustomApp",
     entityId: "Saml-SSO-App",
-    callbackUrl: "https://52.90.8.89:3000/login/callback",
-    signOut: "https://52.90.8.89:3000/signout/callback",
-    entryPoint: "https://52.90.8.89/realms/EnterpriseApps/protocol/saml",
+    callbackUrl: "https://{IP ADDRESS}:{PORT}/login/callback",
+    signOut: "https://{IP ADDRESS}:{PORT}/signout/callback",
+    entryPoint: "https://{IP ADDRESS}/realms/EnterpriseApps/protocol/saml",
 };
 
 // For running apps on https mode
