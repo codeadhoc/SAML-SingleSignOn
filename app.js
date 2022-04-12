@@ -20,9 +20,9 @@ const PORT = 3000;
 const samlConfig = {
     issuer: "EnterpriseCustomApp",
     entityId: "Saml-SSO-App",
-    callbackUrl: "https://3.84.95.177:3000/login/callback",
-    signOut: "https://3.84.95.177:3000/signout/callback",
-    entryPoint: "https://3.84.95.177/realms/EnterpriseApps/protocol/saml",
+    callbackUrl: "https://52.90.8.89:3000/login/callback",
+    signOut: "https://52.90.8.89:3000/signout/callback",
+    entryPoint: "https://52.90.8.89/realms/EnterpriseApps/protocol/saml",
 };
 
 // For running apps on https mode
@@ -84,7 +84,7 @@ app.use(passport.session({}));
 // default route
 app.get('/',
     (req, res) => {
-        res.send('Test Home Page');
+        res.send('Weclome to Single Sign-On Application');
     }
 );
 
