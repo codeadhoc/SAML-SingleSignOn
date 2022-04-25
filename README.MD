@@ -30,7 +30,7 @@ git clone https://github.com/codeadhoc/SAML-SingleSignOn.git
 openssl req -newkey rsa:2048 -nodes -keyout {private_key_name}.key.pem -x509 -days 3650 -out {public_certi_name}.cert.pem
 ```
 
-#### Configures
+#### Configurations
 
 Navigate to sp-pub-cert.pem and replace the string from newly generate {public_certi_name}.cert.pem and sp-pvt-key.pem string  with {private_key_name}.key.pem
 
